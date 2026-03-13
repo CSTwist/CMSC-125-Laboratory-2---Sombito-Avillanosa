@@ -7,9 +7,10 @@ void print_ganttChart(GanttChart *chart) {
     printf("[");
 
     for (int i = 0; i < chart->size; i++) {
-        if (chart->process_order[i] == NULL) {
+        if (chart->process_order[i] == NULL || chart->process_order[i-1]->pid == chart->process_order[i]->pid) {
             printf("-");
-        } else {
+        }
+        else {
             printf("%s", chart->process_order[i]->pid);
         }
     }
