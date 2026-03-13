@@ -79,3 +79,35 @@ Process* dequeue_shortest(ProcessQueue *q) {
 
     return shortest;
 }
+
+// Remove and return the process with the shortest remaining time
+Process* dequeue_shortest_remaining(ProcessQueue *q) {
+    if (is_empty(q)) return NULL;
+
+    int min_index = q->front;
+    int min_rem = q->data[min_index]->remaining_time;
+
+    // Find the index of the process with the shortest remaining time
+    for (int i = 0; i < q->size; i++) {
+        int curr_index = (q->front + i) % MAX_QUEUE_SIZE;
+        if (q->data[curr_index]->remaining_time < min_rem) {
+            min_rem = q->data[curr_index]->remaining_time;
+            min_index = curr_index;
+        }
+    }
+
+    Process *shortest = q->data[min_index];
+
+    // Shift elements down to fill the gap
+    int curr = min_index;
+    while (curr != q->front) {
+        int prev = (curr - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
+        q->data[curr] = q->data[prev];
+        curr = prev;
+    }
+
+    q->front = (q->front + 1) % MAX_QUEUE_SIZE;
+    q->size--;
+
+    return shortest;
+}

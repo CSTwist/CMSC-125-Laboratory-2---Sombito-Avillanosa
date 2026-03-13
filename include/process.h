@@ -28,5 +28,6 @@ void enqueue(ProcessQueue *q, Process *p);
 Process* dequeue(ProcessQueue *q);
 int all_complete(Process *processes, int num_processes);
 Process* dequeue_shortest(ProcessQueue *q);
+Process* dequeue_shortest_remaining(ProcessQueue *q);
 
 #endif // PROCESS_H
