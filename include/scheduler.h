@@ -36,6 +36,7 @@ typedef struct Event {
 
 typedef struct {
     Process *process_order[MAX_TIME];
+    int timestamps[MAX_TIME];
     int size;
 } GanttChart;
 

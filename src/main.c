@@ -59,6 +59,10 @@ int main(int argc, char *argv[]) {
     state.num_processes = num_processes;
     state.current_time = 0;
 
+    for (int i = 0; i < MAX_TIME; i++) {
+        state.gantt_chart.timestamps[i] = -1;
+    }
+
     // Route to the appropriate algorithm based on the CLI arguments
     if (strcmp(algorithm, "FCFS") == 0) {
         schedule_fcfs(&state);
