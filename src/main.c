@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     if (strcmp(algorithm, "FCFS") == 0) {
         schedule_fcfs(&state);
     } else if (strcmp(algorithm, "SJF") == 0) {
-        printf("SJF not yet implemented.\n");
+        schedule_sjf(&state);
     } else if (strcmp(algorithm, "STCF") == 0) {
         printf("STCF not yet implemented.\n");
     } else if (strcmp(algorithm, "RR") == 0) {
