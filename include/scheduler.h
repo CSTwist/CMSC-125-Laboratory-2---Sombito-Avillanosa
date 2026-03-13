@@ -2,6 +2,8 @@
 #define SCHEDULER_H
 
 #include "process.h"
+#define MAX_QUEUES 10
+#define MAX_TIME 10000
 
 typedef struct {
     int level;              // Queue priority level (0 = highest)
@@ -33,9 +35,15 @@ typedef struct Event {
 } Event;
 
 typedef struct {
+    Process *process_order[MAX_TIME];
+    int size;
+} GanttChart;
+
+typedef struct {
     Process *processes;     // Array of all processes
     int num_processes;      // Number of processes
     int current_time;       // Current simulation time
+    GanttChart gantt_chart;
     // ... additional fields for metrics, Gantt chart, etc.
     // Recall: CMSC 141
 } SchedulerState;
@@ -47,6 +55,14 @@ typedef enum {
     RR,
     MLFQ
 } SchedulingAlgorithm;
+
+typedef struct {
+    int num_queues;
+    int quantums[MAX_QUEUES];
+    int allotments[MAX_QUEUES];
+    int boost_period;
+
+} MLFQConfig;
 
 void simulate_scheduler(SchedulerState *state, SchedulingAlgorithm algorithm);
 
