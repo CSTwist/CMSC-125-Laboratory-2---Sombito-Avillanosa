@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(algorithm, "STCF") == 0) {
         schedule_stcf(&state);
     } else if (strcmp(algorithm, "RR") == 0) {
-        printf("RR not yet implemented.\n");
+        schedule_rr(&state, time_quantum);
     } else if (strcmp(algorithm, "MLFQ") == 0) {
         printf("MLFQ not yet implemented.\n");
     } else {
