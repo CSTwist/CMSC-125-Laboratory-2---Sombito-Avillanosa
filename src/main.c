@@ -63,6 +63,22 @@ int main(int argc, char *argv[]) {
         state.gantt_chart.timestamps[i] = -1;
     }
 
+    // Hardcoded MLFQ configuration for testing
+    // (Temporary config)
+    MLFQConfig mlfq_config;
+    mlfq_config.num_queues = 3;
+
+    mlfq_config.quantums[0] = 2;    // Queue 0 (highest priority)
+    mlfq_config.allotments[0] = 4;
+    
+    mlfq_config.quantums[1] = 4;    // Queue 1
+    mlfq_config.allotments[1] = 8;
+    
+    mlfq_config.quantums[2] = -1;   // Queue 2 (lowest - FCFS)
+    mlfq_config.allotments[2] = -1;
+
+    mlfq_config.boost_period = 10;      // Boost period
+
     // Route to the appropriate algorithm based on the CLI arguments
     if (strcmp(algorithm, "FCFS") == 0) {
         schedule_fcfs(&state);
@@ -73,7 +89,7 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(algorithm, "RR") == 0) {
         schedule_rr(&state, time_quantum);
     } else if (strcmp(algorithm, "MLFQ") == 0) {
-        printf("MLFQ not yet implemented.\n");
+        schedule_mlfq(&state, &mlfq_config);
     } else {
         fprintf(stderr, "Error: Unknown algorithm '%s'\n", algorithm);
         return EXIT_FAILURE;
