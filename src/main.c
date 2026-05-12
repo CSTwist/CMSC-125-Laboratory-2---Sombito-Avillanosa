@@ -14,6 +14,7 @@ char input_file[256] = "";
 char process_string[512] = "";
 int time_quantum = 30; // Default qt
 int compare_mode = 0;
+char mlfq_config_file[256] = "";
 
 Process processes[MAX_PROCESSES];
 int num_processes = 0;
@@ -25,13 +26,14 @@ int main(int argc, char *argv[]) {
         {"processes", required_argument, 0, 'p'},
         {"quantum",   required_argument, 0, 'q'},
         {"compare",   no_argument,       0, 'c'},
+        {"mlfq-config",  required_argument, 0, 'm'},
         {0, 0, 0, 0}
     };
 
     int opt;
     int option_index = 0;
 
-    while ((opt = getopt_long(argc, argv, "a:i:p:q:c", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "a:i:p:q:cm:", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'a': 
                 strncpy(algorithm, optarg, 31); 
@@ -54,6 +56,10 @@ int main(int argc, char *argv[]) {
                 break;
             case 'c': 
                 compare_mode = 1; 
+                break;
+            case 'm':
+                strncpy(mlfq_config_file, optarg, sizeof(mlfq_config_file) - 1);
+                mlfq_config_file[sizeof(mlfq_config_file) - 1] = '\0';
                 break;
             default:
                 fprintf(stderr, "Usage: %s --algorithm=<alg> [--input=<file> | --processes=<str>]\n", argv[0]);
@@ -80,8 +86,8 @@ int main(int argc, char *argv[]) {
         state.gantt_chart.timestamps[i] = -1;
     }
 
-    // Hardcoded MLFQ configuration for testing
-    // (Temporary config)
+    // Hardcoded MLFQ configuration
+    // (This is currently the default fallback)
     MLFQConfig mlfq_config;
     mlfq_config.num_queues = 3;
 
@@ -95,6 +101,12 @@ int main(int argc, char *argv[]) {
     mlfq_config.allotments[2] = -1;
 
     mlfq_config.boost_period = 10;      // Boost period
+
+    if (strlen(mlfq_config_file) > 0) {
+        if (load_mlfq_config(mlfq_config_file, &mlfq_config) != 0) {
+            return EXIT_FAILURE;
+        }
+    }
 
     // Route to the appropriate algorithm based on the CLI arguments
     if (strcmp(algorithm, "FCFS") == 0) {
