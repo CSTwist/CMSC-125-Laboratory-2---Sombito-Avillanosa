@@ -1,11 +1,15 @@
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "process.h"
 #include "utils.h"
 
 // Function to parse a single line or string chunk: "PID Arrival Burst"
 void add_process(const char* pid, int arrival, int burst, int* num_processes, int MAX_PROCESSES, Process* processes) {
-    if (*num_processes >= MAX_PROCESSES) return;
+    if (*num_processes >= MAX_PROCESSES) {
+        fprintf(stderr, "Warning: Maximum number of processes (%d) reached. Skipping %s.\n", MAX_PROCESSES, pid);
+        return;
+    }
     
     Process* p = &processes[*num_processes];
     strncpy(p->pid, pid, 15);
@@ -31,12 +35,21 @@ int load_from_file(const char* filename, int* num_processes, int MAX_PROCESSES, 
 
     char line[256];
     while (fgets(line, sizeof(line), file)) {
+        // Skip leading whitespace
+        char *ptr = line;
+        while (isspace((unsigned char)*ptr)) ptr++;
+
         // Skip comments and empty lines
-        if (line[0] == '#' || line[0] == '\n' || line[0] == '\r') continue;
+        if (*ptr == '#' || *ptr == '\0') continue;
 
         char pid[16];
         int arrival, burst;
-        if (sscanf(line, "%15s %d %d", pid, &arrival, &burst) == 3) {
+        if (sscanf(ptr, "%15s %d %d", pid, &arrival, &burst) == 3) {
+            // Validate arrival and burst times
+            if (arrival < 0 || burst < 0) {
+                fprintf(stderr, "Warning: Skipping process %s with negative arrival (%d) or burst (%d) time.\n", pid, arrival, burst);
+                continue;
+            }
             add_process(pid, arrival, burst, num_processes, MAX_PROCESSES, processes);
         }
     }
@@ -52,7 +65,11 @@ void load_from_string(char* str, int* num_processes, int MAX_PROCESSES, Process*
         int arrival, burst;
         // Parse the token using ':' as a delimiter
         if (sscanf(token, "%15[^:]:%d:%d", pid, &arrival, &burst) == 3) {
-            add_process(pid, arrival, burst, num_processes, MAX_PROCESSES, processes);
+            if (arrival < 0 || burst < 0) {
+                fprintf(stderr, "Warning: Skipping process %s with negative arrival (%d) or burst (%d) time.\n", pid, arrival, burst);
+            } else {
+                add_process(pid, arrival, burst, num_processes, MAX_PROCESSES, processes);
+            }
         }
         token = strtok(NULL, ",");
     }
