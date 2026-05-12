@@ -31,17 +31,23 @@ int load_from_file(const char* filename, int* num_processes, int MAX_PROCESSES, 
 
     char line[256];
     while (fgets(line, sizeof(line), file)) {
-        // Skip comments and empty lines
-        if (line[0] == '#' || line[0] == '\n' || line[0] == '\r') continue;
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        char *ptr = line;
+        while (*ptr == ' ' || *ptr == '\t') ptr++;
+
+        if (*ptr == '# || *ptr == '\n || *ptr == '\r || *ptr == '\0) continue;
 
         char pid[16];
         int arrival, burst;
         if (sscanf(line, "%15s %d %d", pid, &arrival, &burst) == 3) {
+            if (arrival < 0 || burst < 0) {
+                fprintf(stderr, "Warning: Skipping process %s with negative arrival/burst time\n", pid);
+                continue;
+            }
             add_process(pid, arrival, burst, num_processes, MAX_PROCESSES, processes);
         }
     }
-    fclose(file);
-    return 0;
 }
 
 // Parse workload from command line string (e.g., "A:0:240,B:10:180")
