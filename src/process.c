@@ -46,6 +46,7 @@ int all_complete(Process *processes, int num_processes) {
 }
 
 // Remove and return the process with the shortest burst time
+// Implementation of Phase 1 Step 2: Tail-shifting logic
 Process* dequeue_shortest(ProcessQueue *q) {
     if (is_empty(q)) return NULL;
 
@@ -65,22 +66,28 @@ Process* dequeue_shortest(ProcessQueue *q) {
     // Extract the shortest process
     Process *shortest = q->data[min_index];
 
-    // Shift elements down to fill the gap without breaking the circular buffer
-    int curr = min_index;
-    while (curr != q->front) {
-        int prev = (curr - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
-        q->data[curr] = q->data[prev];
-        curr = prev;
+    // If it's at the front, we can just use the standard dequeue
+    if (min_index == q->front) {
+        return dequeue(q);
     }
 
-    // Move the front pointer forward and decrease size
-    q->front = (q->front + 1) % MAX_QUEUE_SIZE;
+    // Otherwise, shift elements from min_index to rear backward
+    int curr = min_index;
+    while (curr != q->rear) {
+        int next = (curr + 1) % MAX_QUEUE_SIZE;
+        q->data[curr] = q->data[next];
+        curr = next;
+    }
+
+    // Update rear and size
+    q->rear = (q->rear - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
     q->size--;
 
     return shortest;
 }
 
 // Remove and return the process with the shortest remaining time
+// Implementation of Phase 1 Step 3: Tail-shifting logic
 Process* dequeue_shortest_remaining(ProcessQueue *q) {
     if (is_empty(q)) return NULL;
 
@@ -96,17 +103,24 @@ Process* dequeue_shortest_remaining(ProcessQueue *q) {
         }
     }
 
+    // Extract the shortest process
     Process *shortest = q->data[min_index];
 
-    // Shift elements down to fill the gap
-    int curr = min_index;
-    while (curr != q->front) {
-        int prev = (curr - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
-        q->data[curr] = q->data[prev];
-        curr = prev;
+    // If it's at the front, we can just use the standard dequeue
+    if (min_index == q->front) {
+        return dequeue(q);
     }
 
-    q->front = (q->front + 1) % MAX_QUEUE_SIZE;
+    // Otherwise, shift elements from min_index to rear backward
+    int curr = min_index;
+    while (curr != q->rear) {
+        int next = (curr + 1) % MAX_QUEUE_SIZE;
+        q->data[curr] = q->data[next];
+        curr = next;
+    }
+
+    // Update rear and size
+    q->rear = (q->rear - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
     q->size--;
 
     return shortest;
