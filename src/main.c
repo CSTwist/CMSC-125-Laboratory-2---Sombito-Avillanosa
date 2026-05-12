@@ -37,16 +37,11 @@ int main(int argc, char *argv[]) {
             case 'i': strncpy(input_file, optarg, 255); break;
             case 'p': strncpy(process_string, optarg, 511); break;
             case 'q': time_quantum = atoi(optarg); break;
-            case a: strncpy(algorithm, optarg, 31); algorithm[31] = '0'; break;
-            case i: strncpy(input_file, optarg, 255); input_file[255] = '0'; break;
-            case p: strncpy(process_string, optarg, 511); process_string[511] = '0'; break;
-            case q: 
-                time_quantum = atoi(optarg); 
-                if (time_quantum <= 0) {
-                    fprintf(stderr, "Error: Quantum must be positive\n");
-                    exit(EXIT_FAILURE);
-                }
-                break;
+            case 'c': compare_mode = 1; break;
+            default:
+                fprintf(stderr, "Usage: %s --algorithm=<alg> [--input=<file> | --processes=<str>]\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
     }
 
     if (strlen(input_file) > 0) {

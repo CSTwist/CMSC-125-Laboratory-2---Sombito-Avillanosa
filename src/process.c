@@ -87,7 +87,7 @@ Process* dequeue_shortest(ProcessQueue *q) {
 }
 
 // Remove and return the process with the shortest remaining time
-// (Step 3 will refactor this to use the same tail-shifting logic)
+// Implementation of Phase 1 Step 3: Tail-shifting logic
 Process* dequeue_shortest_remaining(ProcessQueue *q) {
     if (is_empty(q)) return NULL;
 
@@ -103,17 +103,24 @@ Process* dequeue_shortest_remaining(ProcessQueue *q) {
         }
     }
 
+    // Extract the shortest process
     Process *shortest = q->data[min_index];
 
-    // Shift elements down to fill the gap (Original head-shifting logic)
-    int curr = min_index;
-    while (curr != q->front) {
-        int prev = (curr - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
-        q->data[curr] = q->data[prev];
-        curr = prev;
+    // If it's at the front, we can just use the standard dequeue
+    if (min_index == q->front) {
+        return dequeue(q);
     }
 
-    q->front = (q->front + 1) % MAX_QUEUE_SIZE;
+    // Otherwise, shift elements from min_index to rear backward
+    int curr = min_index;
+    while (curr != q->rear) {
+        int next = (curr + 1) % MAX_QUEUE_SIZE;
+        q->data[curr] = q->data[next];
+        curr = next;
+    }
+
+    // Update rear and size
+    q->rear = (q->rear - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
     q->size--;
 
     return shortest;

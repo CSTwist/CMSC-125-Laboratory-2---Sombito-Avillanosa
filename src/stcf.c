@@ -2,7 +2,7 @@
 #include "scheduler.h"
 #include "process.h"
 #include "metrics.h"
-#include "gantt.h"
+
 // External declarations for our queue functions
 void init_queue(ProcessQueue *q);
 int is_empty(ProcessQueue *q);
@@ -12,12 +12,14 @@ int all_complete(Process *processes, int num_processes);
 
 int schedule_stcf(SchedulerState *state) {
     ProcessQueue ready_queue;
+    init_queue(&ready_queue);
+    
     Process *current_process = NULL;
-    GanttChart *stcf_gantt_chart = &state->gantt_chart;
-    stcf_gantt_chart->size = 0;
     int t = 0; 
 
     printf("\nRunning STCF Scheduler...\n\n");
+    printf("=== Gantt Chart ===\n[");
+
     while (!all_complete(state->processes, state->num_processes)) {
         
         // 1. Check for new arrivals at time 't'
@@ -57,9 +59,10 @@ int schedule_stcf(SchedulerState *state) {
                 current_process->start_time = t;
             }
         }
+
         // 4. Execute for 1 time unit
         if (current_process != NULL) {
-            stcf_gantt_chart->process_order[t] = current_process;
+            printf("%s", current_process->pid);
             current_process->remaining_time--;
 
             if (current_process->remaining_time == 0) {
@@ -67,14 +70,9 @@ int schedule_stcf(SchedulerState *state) {
                 current_process = NULL; 
             }
         } else {
-            stcf_gantt_chart->process_order[t] = NULL;
+            printf("-");
         }
 
-        stcf_gantt_chart->size = t + 1;
-        } else {
-    }
-
-    print_ganttChart(&state->gantt_chart);
         t++;
         state->current_time = t;
     }
