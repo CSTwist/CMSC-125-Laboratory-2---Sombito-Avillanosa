@@ -1,0 +1,8 @@
+# MLFQ configuration for testing
+# Format: Q<ID> <Quantum> <Allotment>
+
+Q0 2 4
+Q1 4 8
+Q2 -1 -1
+
+BOOST_PERIOD 10
