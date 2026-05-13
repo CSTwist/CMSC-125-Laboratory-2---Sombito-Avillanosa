@@ -1,0 +1,14 @@
+# Placeholder for Lecture Quiz 3 data
+# Expected metrics:
+# FCFS: TT = 515
+# SJF:  TT = 461
+# STCF: TT = 393
+# RR:   TT = 627 (q=30)
+#
+# Format: PID Arrival Burst
+# (Paste data below)
+A 0 240
+B 10 180
+C 20 150
+D 25 80
+E 30 130
