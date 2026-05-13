@@ -1,0 +1,3 @@
+schedsim
+*.o
+src/*.o

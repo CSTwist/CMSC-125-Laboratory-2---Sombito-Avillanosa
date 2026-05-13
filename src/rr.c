@@ -23,6 +23,9 @@ int schedule_rr(SchedulerState *state, int quantum) {
     printf("\nRunning RR Scheduler...\n");
     printf("Using time quantum q=%d\n\n", quantum);
 
+
+    Process *preempted_process = NULL;
+
     while (!all_complete(state->processes, state->num_processes)) {
 
         if (simulation_time >= MAX_TIME) {
@@ -36,6 +39,12 @@ int schedule_rr(SchedulerState *state, int quantum) {
                 enqueue(&ready_queue, &state->processes[i]);
             }
         }
+
+        if (preempted_process != NULL) {
+            enqueue(&ready_queue, preempted_process);
+            preempted_process = NULL;
+        }
+
 
         // 2. If CPU is idle, pick next process from ready queue
         if (current_process == NULL && !is_empty(&ready_queue)) {
@@ -61,12 +70,14 @@ int schedule_rr(SchedulerState *state, int quantum) {
                 current_process = NULL;
                 quantum_used = 0;
             }
+
             // 4b. If quantum expired and process not finished, preempt and requeue
             else if (quantum_used == quantum) {
-                enqueue(&ready_queue, current_process);
+                preempted_process = current_process;
                 current_process = NULL;
                 quantum_used = 0;
             }
+
         } else {
             rr_gantt_chart->process_order[simulation_time] = NULL;
         }
