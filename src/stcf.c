@@ -2,6 +2,7 @@
 #include "scheduler.h"
 #include "process.h"
 #include "metrics.h"
+#include "gantt.h"
 
 // External declarations for our queue functions
 void init_queue(ProcessQueue *q);
@@ -18,8 +19,7 @@ int schedule_stcf(SchedulerState *state) {
     int t = 0; 
 
     printf("\nRunning STCF Scheduler...\n\n");
-    printf("=== Gantt Chart ===\n[");
-
+    
     while (!all_complete(state->processes, state->num_processes)) {
         
         // 1. Check for new arrivals at time 't'
@@ -62,7 +62,7 @@ int schedule_stcf(SchedulerState *state) {
 
         // 4. Execute for 1 time unit
         if (current_process != NULL) {
-            printf("%s", current_process->pid);
+            state->gantt_chart.process_order[t] = current_process;
             current_process->remaining_time--;
 
             if (current_process->remaining_time == 0) {
@@ -70,14 +70,16 @@ int schedule_stcf(SchedulerState *state) {
                 current_process = NULL; 
             }
         } else {
-            printf("-");
+            state->gantt_chart.process_order[t] = NULL;
         }
 
         t++;
         state->current_time = t;
     }
     
-    printf("]\nTime: %d\n\n", t);
+    state->gantt_chart.size = t;
+    print_ganttChart(&state->gantt_chart);
+
     
     print_metrics(state);
     

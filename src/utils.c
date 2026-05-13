@@ -74,3 +74,38 @@ void load_from_string(char* str, int* num_processes, int MAX_PROCESSES, Process*
         token = strtok(NULL, ",");
     }
 }
+
+int load_mlfq_config(const char *filename, MLFQConfig *config) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("Error opening MLFQ config file");
+        return -1;
+    }
+
+    config->num_queues = 0;
+    config->boost_period = 0;
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        char *ptr = line;
+        while (isspace((unsigned char)*ptr)) ptr++;
+        if (*ptr == '#' || *ptr == '\0') continue;
+
+        if (strncmp(ptr, "BOOST_PERIOD", 12) == 0) {
+            sscanf(ptr + 12, "%d", &config->boost_period);
+        } else if (*ptr == 'Q') {
+            int qid, quantum, allotment;
+            if (sscanf(ptr, "Q%d %d %d", &qid, &quantum, &allotment) == 3) {
+                if (qid >= 0 && qid < MAX_QUEUES) {
+                    config->quantums[qid] = quantum;
+                    config->allotments[qid] = allotment;
+                    if (qid + 1 > config->num_queues) {
+                        config->num_queues = qid + 1;
+                    }
+                }
+            }
+        }
+    }
+    fclose(file);
+    return 0;
+}

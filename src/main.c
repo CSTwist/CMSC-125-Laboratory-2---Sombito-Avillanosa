@@ -14,24 +14,73 @@ char input_file[256] = "";
 char process_string[512] = "";
 int time_quantum = 30; // Default qt
 int compare_mode = 0;
+char mlfq_config_file[256] = "";
+MLFQConfig mlfq_config;
+
 
 Process processes[MAX_PROCESSES];
 int num_processes = 0;
 
+
+void run_comparison(SchedulerState *original_state) {
+    const char* algos[] = {"FCFS", "SJF", "STCF", "RR", "MLFQ"};
+    double avg_tt[5] = {0}, avg_wt[5] = {0}, avg_rt[5] = {0};
+    
+    for (int i = 0; i < 5; i++) {
+        Process processes_copy[MAX_PROCESSES];
+        memcpy(processes_copy, original_state->processes, sizeof(Process) * original_state->num_processes);
+        
+        SchedulerState state = {0};
+        state.processes = processes_copy;
+        state.num_processes = original_state->num_processes;
+        state.current_time = 0;
+        for (int j = 0; j < MAX_TIME; j++) state.gantt_chart.timestamps[j] = -1;
+        
+        if (i == 0) schedule_fcfs(&state);
+        else if (i == 1) schedule_sjf(&state);
+        else if (i == 2) schedule_stcf(&state);
+        else if (i == 3) schedule_rr(&state, time_quantum);
+        else if (i == 4) schedule_mlfq(&state, &mlfq_config);
+        
+        double total_tt = 0, total_wt = 0, total_rt = 0;
+        for (int p = 0; p < state.num_processes; p++) {
+            int tt = state.processes[p].finish_time - state.processes[p].arrival_time;
+            int wt = tt - state.processes[p].burst_time;
+            int rt = state.processes[p].start_time - state.processes[p].arrival_time;
+            total_tt += tt;
+            total_wt += wt;
+            total_rt += rt;
+        }
+        avg_tt[i] = total_tt / state.num_processes;
+        avg_wt[i] = total_wt / state.num_processes;
+        avg_rt[i] = total_rt / state.num_processes;
+    }
+    
+    printf("\n=== Comparison Summary ===\n");
+    printf("%-10s | %-10s | %-10s | %-10s\n", "Algorithm", "Avg TT", "Avg WT", "Avg RT");
+    printf("-----------|------------|------------|------------\n");
+    for (int i = 0; i < 5; i++) {
+        printf("%-10s | %10.2f | %10.2f | %10.2f\n", algos[i], avg_tt[i], avg_wt[i], avg_rt[i]);
+    }
+    printf("\n");
+}
+
 int main(int argc, char *argv[]) {
+
     static struct option long_options[] = {
         {"algorithm", required_argument, 0, 'a'},
         {"input",     required_argument, 0, 'i'},
         {"processes", required_argument, 0, 'p'},
         {"quantum",   required_argument, 0, 'q'},
         {"compare",   no_argument,       0, 'c'},
+        {"mlfq-config", required_argument, 0, 'm'},
         {0, 0, 0, 0}
     };
 
     int opt;
     int option_index = 0;
 
-    while ((opt = getopt_long(argc, argv, "a:i:p:q:c", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "a:i:p:q:cm:", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'a': 
                 strncpy(algorithm, optarg, 31); 
@@ -51,6 +100,11 @@ int main(int argc, char *argv[]) {
                     fprintf(stderr, "Error: Quantum must be positive\n");
                     exit(EXIT_FAILURE);
                 }
+                break;
+            
+            case 'm': 
+                strncpy(mlfq_config_file, optarg, 255); 
+                mlfq_config_file[255] = '\0'; 
                 break;
             case 'c': 
                 compare_mode = 1; 
@@ -80,36 +134,43 @@ int main(int argc, char *argv[]) {
         state.gantt_chart.timestamps[i] = -1;
     }
 
-    // Hardcoded MLFQ configuration for testing
-    // (Temporary config)
-    MLFQConfig mlfq_config;
+    
     mlfq_config.num_queues = 3;
-
-    mlfq_config.quantums[0] = 2;    // Queue 0 (highest priority)
-    mlfq_config.allotments[0] = 4;
-    
-    mlfq_config.quantums[1] = 4;    // Queue 1
-    mlfq_config.allotments[1] = 8;
-    
-    mlfq_config.quantums[2] = -1;   // Queue 2 (lowest - FCFS)
+    mlfq_config.quantums[0] = 10;
+    mlfq_config.allotments[0] = 50;
+    mlfq_config.quantums[1] = 30;
+    mlfq_config.allotments[1] = 100;
+    mlfq_config.quantums[2] = -1;
     mlfq_config.allotments[2] = -1;
+    mlfq_config.boost_period = 200;
 
-    mlfq_config.boost_period = 10;      // Boost period
+    if (strlen(mlfq_config_file) > 0) {
+        if (load_mlfq_config(mlfq_config_file, &mlfq_config) != 0) {
+            fprintf(stderr, "Failed to load MLFQ config\n");
+            return EXIT_FAILURE;
+        }
+    }
 
+
+    
     // Route to the appropriate algorithm based on the CLI arguments
-    if (strcmp(algorithm, "FCFS") == 0) {
-        schedule_fcfs(&state);
-    } else if (strcmp(algorithm, "SJF") == 0) {
-        schedule_sjf(&state);
-    } else if (strcmp(algorithm, "STCF") == 0) {
-        schedule_stcf(&state);
-    } else if (strcmp(algorithm, "RR") == 0) {
-        schedule_rr(&state, time_quantum);
-    } else if (strcmp(algorithm, "MLFQ") == 0) {
-        schedule_mlfq(&state, &mlfq_config);
+    if (compare_mode) {
+        run_comparison(&state);
     } else {
-        fprintf(stderr, "Error: Unknown algorithm '%s'\n", algorithm);
-        return EXIT_FAILURE;
+        if (strcmp(algorithm, "FCFS") == 0) {
+            schedule_fcfs(&state);
+        } else if (strcmp(algorithm, "SJF") == 0) {
+            schedule_sjf(&state);
+        } else if (strcmp(algorithm, "STCF") == 0) {
+            schedule_stcf(&state);
+        } else if (strcmp(algorithm, "RR") == 0) {
+            schedule_rr(&state, time_quantum);
+        } else if (strcmp(algorithm, "MLFQ") == 0) {
+            schedule_mlfq(&state, &mlfq_config);
+        } else {
+            fprintf(stderr, "Error: Unknown algorithm '%s'\n", algorithm);
+            return EXIT_FAILURE;
+        }
     }
 
     return EXIT_SUCCESS;
