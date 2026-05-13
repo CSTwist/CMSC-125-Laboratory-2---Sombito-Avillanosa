@@ -255,28 +255,19 @@ make test
 
 ---
 
+# Known Limitations and Assumptions
+
+* **Static Limits:** The simulator uses fixed-size arrays for process limits (MAX_PROCESSES=100) and maximum simulation time (MAX_TIME=10000). Large workloads exceeding these boundaries will cause a warning or error.
+* **MLFQ Constraints:** The Multi-Level Feedback Queue scheduler determines process lengths strictly by execution time and queue placement rather than relying on burst times, simulating a true dynamic scheduling algorithm.
+* **Memory Management:** For simplicity and safety, the simulator largely utilizes static memory allocation over dynamic allocation, inherently avoiding memory leaks without imposing heap management overheads.
+
+---
+
 # Current Progress
 
-- Repository created
-- Project structure planned
-- README documentation prepared
-- Process data structures
-- Scheduling algorithm implementations
-- Metrics computation
-- Gantt chart rendering
-- MLFQ design and implementation
-
----
-
-# Future Work
-
-The next development stages will focus on:
-
-* Implementing Process data structures
-* Building the simulation engine
-* Implementing FCFS, SJF, STCF, RR schedulers
-* Designing and testing a custom MLFQ scheduler
-* Generating Gantt charts and scheduling metrics
-* Creating automated tests for validation
-
----
+- **Completed:** Repository setup and modular file structure.
+- **Completed:** Data structure modeling for queues and process scheduling.
+- **Completed:** Implementation of the main simulation engine.
+- **Completed:** Implementation of scheduling algorithms: FCFS, SJF, STCF, RR, and a custom MLFQ.
+- **Completed:** Gantt Chart rendering and accurate simulation metrics generation.
+- **Completed:** Automated testing pipeline using make test.
