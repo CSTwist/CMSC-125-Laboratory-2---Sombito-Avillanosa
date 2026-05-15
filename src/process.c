@@ -46,7 +46,6 @@ int all_complete(Process *processes, int num_processes) {
 }
 
 // Remove and return the process with the shortest burst time
-// Implementation of Phase 1 Step 2: Tail-shifting logic
 Process* dequeue_shortest(ProcessQueue *q) {
     if (is_empty(q)) return NULL;
 
@@ -66,7 +65,7 @@ Process* dequeue_shortest(ProcessQueue *q) {
     // Extract the shortest process
     Process *shortest = q->data[min_index];
 
-    // If it's at the front, we can just use the standard dequeue
+    // If it's at the front, use the standard dequeue
     if (min_index == q->front) {
         return dequeue(q);
     }
@@ -87,7 +86,6 @@ Process* dequeue_shortest(ProcessQueue *q) {
 }
 
 // Remove and return the process with the shortest remaining time
-// Implementation of Phase 1 Step 3: Tail-shifting logic
 Process* dequeue_shortest_remaining(ProcessQueue *q) {
     if (is_empty(q)) return NULL;
 
@@ -106,7 +104,7 @@ Process* dequeue_shortest_remaining(ProcessQueue *q) {
     // Extract the shortest process
     Process *shortest = q->data[min_index];
 
-    // If it's at the front, we can just use the standard dequeue
+    // If it's at the front, use the standard dequeue
     if (min_index == q->front) {
         return dequeue(q);
     }

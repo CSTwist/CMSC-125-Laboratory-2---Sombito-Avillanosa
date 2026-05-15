@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
     reset_processes(original_processes, processes, num_processes);
 
 
-    // Set up the state object that we will pass to the schedulers
+    // Set up the state object to pass to the schedulers
     SchedulerState state = {0};
     state.processes = processes;
     state.num_processes = num_processes;

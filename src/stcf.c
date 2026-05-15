@@ -23,14 +23,14 @@ int schedule_stcf(SchedulerState *state) {
             return -1;
         }
         
-        // 1. Check for new arrivals at time 't'
+        // Check for new arrivals at time 't'
         for (int i = 0; i < state->num_processes; i++) {
             if (state->processes[i].arrival_time == t) {
                 enqueue(&ready_queue, &state->processes[i]);
             }
         }
 
-        // 2. Preemption logic
+        // Check for preemption
         // If a process is running, check whether a ready process has shorter remaining time
         if (current_process != NULL && !is_empty(&ready_queue)) {
             int min_rem = current_process->remaining_time;
@@ -51,7 +51,7 @@ int schedule_stcf(SchedulerState *state) {
             }
         }
 
-        // 3. Select process with shortest remaining time
+        // Select process with shortest remaining time
         if (current_process == NULL && !is_empty(&ready_queue)) {
             current_process = dequeue_shortest_remaining(&ready_queue);
             
@@ -60,7 +60,7 @@ int schedule_stcf(SchedulerState *state) {
             }
         }
 
-        // 4. Execute for 1 time unit and record Gantt chart data
+        // Execute for 1 time unit and record Gantt chart data
         if (current_process != NULL) {
             stcf_gantt_chart->process_order[t] = current_process;
 
