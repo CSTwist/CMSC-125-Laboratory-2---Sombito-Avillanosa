@@ -30,38 +30,30 @@ int schedule_mlfq(SchedulerState *state, MLFQConfig *config) {
             return -1;
         }
 
-        // 1. Handle arrivals: all new jobs enter highest-priority queue
+        // Handle arrivals: all new jobs enter highest-priority queue
         for (int i = 0; i < state->num_processes; i++) {
             if (state->processes[i].arrival_time == simulation_time) {
                 state->processes[i].priority = 0;
                 state->processes[i].time_in_queue = 0;
                 enqueue(&queues[0], &state->processes[i]);
 
-                // // Debug trace print
-                // printf("t=%d: %s arrives -> Q0\n", 
-                //     simulation_time, 
-                //     state->processes[i].pid);
             }
             
             
         }
 
 
-        // 2. Priority boost
+        // Priority boost
         if (config->boost_period > 0 &&
             simulation_time > 0 &&
             simulation_time % config->boost_period == 0) {
 
-            // // Debug trace print
-            // printf("\n=== BOOST at t=%d ===\n", simulation_time);
 
             // Move all queued processes back to Q0
             for (int level = 1; level < config->num_queues; level++) {
                 while (!is_empty(&queues[level])) {
                     Process *p = dequeue(&queues[level]);
 
-                    // // Debug trace print
-                    // printf("t=%d: %s boosted to Q0\n", simulation_time, p->pid);
 
                     p->priority = 0;
                     p->time_in_queue = 0;
@@ -72,10 +64,6 @@ int schedule_mlfq(SchedulerState *state, MLFQConfig *config) {
             // Also boost current running process
             if (current_process != NULL) {
                 
-                // // Debug trace print
-                // printf("t=%d: %s boosted (was running)\n",
-                //     simulation_time,
-                //     current_process->pid);
                 
                 current_process->priority = 0;
                 current_process->time_in_queue = 0;
@@ -86,7 +74,7 @@ int schedule_mlfq(SchedulerState *state, MLFQConfig *config) {
             }
         }
 
-        // 3. If CPU idle, pick from highest-priority non-empty queue
+        // If CPU idle, pick from highest-priority non-empty queue
         if (current_process == NULL) {
             for (int level = 0; level < config->num_queues; level++) {
                 if (!is_empty(&queues[level])) {
@@ -97,25 +85,15 @@ int schedule_mlfq(SchedulerState *state, MLFQConfig *config) {
                         current_process->start_time = simulation_time;
                     }
                     
-                    // // Debug trace print
-                    // printf("t=%d: %s scheduled from Q%d\n",
-                    //     simulation_time,
-                    //     current_process->pid,
-                    //     current_process->priority);
 
                     break;
                 }
             }
         }
 
-        // 4. Execute one tick
+        // Execute one tick
         if (current_process != NULL) {
 
-            // // Debug trace print
-            // printf("t=%d: running %s (Q%d)\n",
-            //     simulation_time,
-            //     current_process->pid,
-            //     current_process->priority);
 
             mlfq_gantt_chart->process_order[simulation_time] = current_process;
 
@@ -130,8 +108,6 @@ int schedule_mlfq(SchedulerState *state, MLFQConfig *config) {
             // Process finished
             if (current_process->remaining_time == 0) {
                 current_process->finish_time = simulation_time + 1;
-                // // Debug trace print
-                // printf("t=%d: %s finished\n", simulation_time + 1, current_process->pid);
 
                 current_process = NULL;
                 quantum_used = 0;
@@ -149,18 +125,8 @@ int schedule_mlfq(SchedulerState *state, MLFQConfig *config) {
 
                     current_process->priority++;
                     current_process->time_in_queue = 0;
-                    // // Debug trace print
-                    // printf("t=%d: %s DEMOTED to Q%d\n",
-                    //     simulation_time + 1,
-                    //     current_process->pid,
-                    //     current_process->priority);
                 }
 
-                // // Debug trace print
-                // printf("t=%d: %s requeued in Q%d\n",
-                //     simulation_time + 1,
-                //     current_process->pid,
-                //     current_process->priority);
 
                 enqueue(&queues[current_process->priority], current_process);
                 current_process = NULL;

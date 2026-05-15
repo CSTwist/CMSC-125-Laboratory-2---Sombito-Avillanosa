@@ -18,7 +18,7 @@ void print_metrics(SchedulerState *state){
 
         // Calculate the metrics
         int tt = p->finish_time - p->arrival_time;
-        p->waiting_time = tt - p->burst_time; // Stored back in your struct
+        p->waiting_time = tt - p->burst_time; // Update process waiting time
         int rt = p->start_time - p->arrival_time;
 
         // Add to running totals for average calculation

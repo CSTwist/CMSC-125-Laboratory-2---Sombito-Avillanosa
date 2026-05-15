@@ -23,14 +23,14 @@ int schedule_sjf(SchedulerState *state) {
             return -1;
         }
         
-        // 1. Check for new arrivals at exactly time 'simulation_time'
+        // Check for new arrivals at exactly time 'simulation_time'
         for (int i = 0; i < state->num_processes; i++) {
             if (state->processes[i].arrival_time == simulation_time) {
                 enqueue(&ready_queue, &state->processes[i]);
             }
         }
 
-        // 2. If CPU is idle, select the next process from the queue
+        // If CPU is idle, select the next process from the queue
         if (current_process == NULL && !is_empty(&ready_queue)) {
             current_process = dequeue_shortest(&ready_queue);
             
@@ -40,14 +40,14 @@ int schedule_sjf(SchedulerState *state) {
             }
         }
 
-        // 3. Execute the running process for 1 time unit
+        // Execute the running process for 1 time unit
         if (current_process != NULL) {
             // Saves the process ID character to the Gantt chart
             fcfs_gantt_chart->process_order[simulation_time] = current_process;
             
             current_process->remaining_time--;
 
-            // 4. Check if the process just finished
+            // Check if the process just finished
             if (current_process->remaining_time == 0) {
                 current_process->finish_time = simulation_time + 1; // It finishes at the end of this tick
                 current_process = NULL; // Evict from CPU so next process can run

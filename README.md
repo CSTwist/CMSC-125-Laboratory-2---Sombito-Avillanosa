@@ -263,11 +263,3 @@ make test
 
 ---
 
-# Current Progress
-
-- **Completed:** Repository setup and modular file structure.
-- **Completed:** Data structure modeling for queues and process scheduling.
-- **Completed:** Implementation of the main simulation engine.
-- **Completed:** Implementation of scheduling algorithms: FCFS, SJF, STCF, RR, and a custom MLFQ.
-- **Completed:** Gantt Chart rendering and accurate simulation metrics generation.
-- **Completed:** Automated testing pipeline using make test.

@@ -33,7 +33,7 @@ int schedule_rr(SchedulerState *state, int quantum) {
             return -1;
         }
 
-        // 1. Check for new arrivals at exactly time 'simulation_time'
+        // Check for new arrivals at exactly time 'simulation_time'
         for (int i = 0; i < state->num_processes; i++) {
             if (state->processes[i].arrival_time == simulation_time) {
                 enqueue(&ready_queue, &state->processes[i]);
@@ -46,7 +46,7 @@ int schedule_rr(SchedulerState *state, int quantum) {
         }
 
 
-        // 2. If CPU is idle, pick next process from ready queue
+        // If CPU is idle, pick next process from ready queue
         if (current_process == NULL && !is_empty(&ready_queue)) {
             current_process = dequeue(&ready_queue);
             quantum_used = 0;
@@ -57,21 +57,21 @@ int schedule_rr(SchedulerState *state, int quantum) {
             }
         }
 
-        // 3. Execute current process for 1 time unit
+        // Execute current process for 1 time unit
         if (current_process != NULL) {
             rr_gantt_chart->process_order[simulation_time] = current_process;
 
             current_process->remaining_time--;
             quantum_used++;
 
-            // 4a. If process finished, record finish time
+            // If process finished, record finish time
             if (current_process->remaining_time == 0) {
                 current_process->finish_time = simulation_time + 1;
                 current_process = NULL;
                 quantum_used = 0;
             }
 
-            // 4b. If quantum expired and process not finished, preempt and requeue
+            // If quantum expired and process not finished, preempt and requeue
             else if (quantum_used == quantum) {
                 preempted_process = current_process;
                 current_process = NULL;
